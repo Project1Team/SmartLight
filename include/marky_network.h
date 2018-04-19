@@ -18,9 +18,9 @@
 /*
  * @brief	server information
  */
-#define MARKY_SERVER_Ip			"192.168.137.150"			//Local IP of wifi
+#define MARKY_SERVER_Ip			"192.168.137.251"			//Local IP of wifi
 #define MARKY_SERVER_Port		"8887"						//Local port
-#define MARKY_SERVER_SubUrl		"/devices"					//ws enpoint
+#define MARKY_SERVER_SubUrl		"/ws"					//ws enpoint
 
 
 /*

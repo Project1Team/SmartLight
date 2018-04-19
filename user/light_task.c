@@ -35,10 +35,10 @@ void Light_Task(void *pArg)
 	WS2812_Begin();
 
 	//light up first
-	mailbox->light[0] = 255,			//Br
+	mailbox->light[0] = 255,		//Br
 	mailbox->light[1] = 255,		//W
 	mailbox->light[2] = 255,		//B
-	mailbox->light[3] = 255,			//G
+	mailbox->light[3] = 255,		//G
 	mailbox->light[4] = 255,		//R
 	//mailbox->light[5] = 255;
 

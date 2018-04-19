@@ -173,11 +173,11 @@ bool MARKY_WS_Recv(noPollConn* conn, uint8_t* recvData)
 {
 	noPollMsg* msg;
 	char* readData = NULL;
-	char* red = "Red";
-	char* green = "Green";
-	char* blue = "Blue";
-	char* turn_off = "Off";
-	char* turn_on = "On";
+	// char* red = "Red";
+	// char* green = "Green";
+	// char* blue = "Blue";
+	// char* turn_off = "Off";
+	// char* turn_on = "On";
 
 	if ( !nopoll_conn_is_ready (conn) )
 		return false;
@@ -189,26 +189,32 @@ bool MARKY_WS_Recv(noPollConn* conn, uint8_t* recvData)
 			return false;
 
 		readData = (char*)nopoll_msg_get_payload(msg);
+		int i;
+		for (i = 0; i < strlen(readData); i++)
+		{
+			if ((readData[i] < '0') || (readData[i] > '9'))
+			return false;
+		}
 
 		//red from client
-		if (strcmp(readData, red) == 0)
-			readData = "255000000255255";
-		else
-		//green from client
-		if (strcmp(readData, green) == 0)
-			readData = "000255000255255";
-		else
-		//blue from client
-		if (strcmp(readData, blue) == 0)
-			readData = "000000255255255";
-		else
-		//turn off from client
-		if (strcmp(readData, turn_off) == 0)
-			readData = "000000000000000";
-		else
-		//turn on from client
-		if (strcmp(readData, turn_on) == 0)
-			readData = "255255255255255";
+		// if (strcmp(readData, red) == 0)
+		// 	readData = "255000000255255";
+		// else
+		// //green from client
+		// if (strcmp(readData, green) == 0)
+		// 	readData = "000255000255255";
+		// else
+		// //blue from client
+		// if (strcmp(readData, blue) == 0)
+		// 	readData = "000000255255255";
+		// else
+		// //turn off from client
+		// if (strcmp(readData, turn_off) == 0)
+		// 	readData = "000000000000000";
+		// else
+		// //turn on from client
+		// if (strcmp(readData, turn_on) == 0)
+		// 	readData = "255255255255255";
 
 		//012345678901234
 		//255255255255255	//light on max brightness
@@ -277,5 +283,3 @@ bool MARKY_WS_CheckWSMailBox(noPollConn* conn)
 
 	return FD_ISSET(conn->session, &readfds);
 }
-
-

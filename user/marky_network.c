@@ -81,28 +81,26 @@ bool MARKY_WS_LogintoServer(noPollConn** conn)
 	//*conn = (noPollConn*)nopoll_conn_tls_new (ctx, opts, MARKY_SERVER_Ip, MARKY_SERVER_Port, NULL, MARKY_SERVER_SubUrl, NULL, NULL);
 
 	*conn = (noPollConn*)nopoll_conn_new (ctx, MARKY_SERVER_Ip, MARKY_SERVER_Port, NULL, MARKY_SERVER_SubUrl, NULL, NULL);
-
-
-	if (! nopoll_conn_is_ready(*conn))
-	{
-		nopoll_conn_close(*conn);
-		//nopoll_conn_opts_free(opts);
-		nopoll_ctx_unref(ctx);
-		return false;
-	}
-
-	//send id and pass
-	send = MARKY_WS_InitMessages_Login();
-	sendLen = strlen(send);
-	if (nopoll_conn_send_text (*conn, send, sendLen ) <= 0)
-	{
-		free(send);
-		nopoll_conn_close(*conn);
-		//nopoll_conn_opts_free(opts);
-		nopoll_ctx_unref(ctx);
-		return false;
-	}
-	free(send);
+	// if (! nopoll_conn_is_ready(*conn))
+	// {
+	// 	nopoll_conn_close(*conn);
+	// 	//nopoll_conn_opts_free(opts);
+	// 	nopoll_ctx_unref(ctx);
+	// 	return false;
+	// }
+	//
+	// //send id and pass
+	// send = MARKY_WS_InitMessages_Login();
+	// sendLen = strlen(send);
+	// if (nopoll_conn_send_text (*conn, send, sendLen ) <= 0)
+	// {
+	// 	free(send);
+	// 	nopoll_conn_close(*conn);
+	// 	//nopoll_conn_opts_free(opts);
+	// 	nopoll_ctx_unref(ctx);
+	// 	return false;
+	// }
+	// free(send);
 
 	/*
 	//see if login succeed
@@ -139,33 +137,32 @@ bool MARKY_WS_Send(noPollConn* conn, MARKY_SendType type, uint16_t sendData)
 
 	switch(type)
 	{
-	case MARKY_SendT_Light_Set:
-		send = MARKY_WS_InitMessages_LightSet(sendData);
-		sendLen = strlen(send);
+		case MARKY_SendT_Light_Set:
+			send = MARKY_WS_InitMessages_LightSet(sendData);
+			sendLen = strlen(send);
 
-		if (! nopoll_conn_is_ready (conn))
-			return nopoll_false;
+			if (! nopoll_conn_is_ready (conn))
+				return nopoll_false;
 
-		if (nopoll_conn_send_text (conn, send, sendLen) <= 0)
-			return nopoll_false;
+			if (nopoll_conn_send_text (conn, send, sendLen) <= 0)
+				return nopoll_false;
 
-		nopoll_conn_read (conn, recv, recvLen, nopoll_false, 5);
-		if (strncmp(recv, MARKY_WS_MS_Recv_Ok, recvLen) != 0)
+			nopoll_conn_read (conn, recv, recvLen, nopoll_false, 5);
+			if (strncmp(recv, MARKY_WS_MS_Recv_Ok, recvLen) != 0)
+				return false;
+
+			free(send);
+			break;
+
+		case MARKY_SendT_Detected_Person:
+			//TODO	make this available
+			//not supported yet
 			return false;
+			break;
 
-		free(send);
-
-		break;
-	case MARKY_SendT_Detected_Person:
-		//TODO	make this available
-		//not supported yet
-		return false;
-
-		break;
-	default:
-		break;
+		default:
+			break;
 	}
-
 	return true;
 }
 
@@ -277,9 +274,9 @@ bool MARKY_WS_CheckWSMailBox(noPollConn* conn)
 
     FD_ZERO(&readfds);
     FD_SET(conn->session, &readfds);
-	FD_SET(STDIN_FILENO, &readfds);
+		FD_SET(STDIN_FILENO, &readfds);
 
-	select(conn->session+1, &readfds, NULL, (fd_set*)0, &tv);
+		select(conn->session+1, &readfds, NULL, (fd_set*)0, &tv);
 
-	return FD_ISSET(conn->session, &readfds);
+		return FD_ISSET(conn->session, &readfds);
 }

@@ -55,10 +55,10 @@ char* MARKY_WS_InitMessages_LightSet(uint16_t light)
 	//pin it to message
 	for(i = 0; i < 17; i++)
 		message[36 + i] = macAddress[i];
-	message[58] = ((light / 1000) % 10) + '0';
-	message[59] = ((light / 100) % 10) + '0';
-	message[60] = ((light / 10) % 10) + '0';
-	message[61] = ((light / 1) % 10) + '0';
+		message[58] = ((light / 1000) % 10) + '0';
+		message[59] = ((light / 100) % 10) + '0';
+		message[60] = ((light / 10) % 10) + '0';
+		message[61] = ((light / 1) % 10) + '0';
 
 	return message;
 }
@@ -74,6 +74,11 @@ bool MARKY_WS_LogintoServer(noPollConn** conn)
 	char* send = NULL;
 	int sendLen = 0;
 
+	uint8		macArray[6] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+	char		macAddress[17];
+	wifi_get_macaddr(STATION_IF, macArray);
+	sprintf(macAddress, "%02x:%02x:%02x:%02x:%02x:%02x", macArray[5], macArray[4], macArray[3], macArray[2], macArray[1], macArray[0]);
+
 	//connect to server
 	ctx = (noPollCtx*)nopoll_ctx_new();
 	//opts = nopoll_conn_opts_new ();
@@ -81,6 +86,13 @@ bool MARKY_WS_LogintoServer(noPollConn** conn)
 	//*conn = (noPollConn*)nopoll_conn_tls_new (ctx, opts, MARKY_SERVER_Ip, MARKY_SERVER_Port, NULL, MARKY_SERVER_SubUrl, NULL, NULL);
 
 	*conn = (noPollConn*)nopoll_conn_new (ctx, MARKY_SERVER_Ip, MARKY_SERVER_Port, NULL, MARKY_SERVER_SubUrl, NULL, NULL);
+
+	//send MAC Address
+	nopoll_conn_send_text (*conn, macAddress ,strlen(macAddress));
+
+
+
+	// nopoll_conn_send_text (*conn, MARKY_WS_MS_Send_Login ,strlen(MARKY_WS_MS_Send_Login));
 	// if (! nopoll_conn_is_ready(*conn))
 	// {
 	// 	nopoll_conn_close(*conn);

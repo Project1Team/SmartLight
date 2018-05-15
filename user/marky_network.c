@@ -66,6 +66,7 @@ char* MARKY_WS_InitMessages_LightSet(uint16_t light)
 bool MARKY_WS_LogintoServer(noPollConn** conn)
 {
 	//TODO	store ctx, opts to free in other place
+	//TODO	ssl & tls verify
 	noPollCtx*  ctx;
 	//noPollConnOpts* opts;
 	noPollMsg* msg;
@@ -77,7 +78,7 @@ bool MARKY_WS_LogintoServer(noPollConn** conn)
 	uint8		macArray[6] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 	char		macAddress[17];
 	wifi_get_macaddr(STATION_IF, macArray);
-	sprintf(macAddress, "%02x:%02x:%02x:%02x:%02x:%02x", macArray[5], macArray[4], macArray[3], macArray[2], macArray[1], macArray[0]);
+	sprintf(macAddress, "deviceConnect/%02x:%02x:%02x:%02x:%02x:%02x", macArray[5], macArray[4], macArray[3], macArray[2], macArray[1], macArray[0]);
 
 	//connect to server
 	ctx = (noPollCtx*)nopoll_ctx_new();
@@ -89,41 +90,6 @@ bool MARKY_WS_LogintoServer(noPollConn** conn)
 
 	//send MAC Address
 	nopoll_conn_send_text (*conn, macAddress ,strlen(macAddress));
-
-
-
-	// nopoll_conn_send_text (*conn, MARKY_WS_MS_Send_Login ,strlen(MARKY_WS_MS_Send_Login));
-	// if (! nopoll_conn_is_ready(*conn))
-	// {
-	// 	nopoll_conn_close(*conn);
-	// 	//nopoll_conn_opts_free(opts);
-	// 	nopoll_ctx_unref(ctx);
-	// 	return false;
-	// }
-	//
-	// //send id and pass
-	// send = MARKY_WS_InitMessages_Login();
-	// sendLen = strlen(send);
-	// if (nopoll_conn_send_text (*conn, send, sendLen ) <= 0)
-	// {
-	// 	free(send);
-	// 	nopoll_conn_close(*conn);
-	// 	//nopoll_conn_opts_free(opts);
-	// 	nopoll_ctx_unref(ctx);
-	// 	return false;
-	// }
-	// free(send);
-
-	/*
-	//see if login succeed
-	nopoll_conn_read (*conn, recv, recvLen, nopoll_false, 5);
-	if (strncmp(recv, MARKY_WS_MS_Recv_Ok, recvLen) != 0)
-	{
-		nopoll_conn_close(*conn);
-		//nopoll_conn_opts_free(opts);
-		nopoll_ctx_unref(ctx);
-		return false;
-	}*/
 
 	return true;
 }
@@ -182,12 +148,8 @@ bool MARKY_WS_Recv(noPollConn* conn, uint8_t* recvData)
 {
 	noPollMsg* msg;
 	char* readData = NULL;
-	// char* red = "Red";
-	// char* green = "Green";
-	// char* blue = "Blue";
-	// char* turn_off = "Off";
-	// char* turn_on = "On";
-
+	char* changeColor = "changeColor/";
+	char msgColor[100];
 	if ( !nopoll_conn_is_ready (conn) )
 		return false;
 
@@ -198,11 +160,17 @@ bool MARKY_WS_Recv(noPollConn* conn, uint8_t* recvData)
 			return false;
 
 		readData = (char*)nopoll_msg_get_payload(msg);
-		int i;
-		for (i = 0; i < strlen(readData); i++)
+		int i, j = 0;
+		for (i = 0; i < 12; i++)
 		{
-			if ((readData[i] < '0') || (readData[i] > '9'))
-			return false;
+			if(readData[i] != changeColor[i])
+				return false;
+		}
+
+		for (i = 12; i < 100; i++)
+		{
+			msgColor[j] = readData[i];
+			j++;
 		}
 
 		//red from client
@@ -240,29 +208,29 @@ bool MARKY_WS_Recv(noPollConn* conn, uint8_t* recvData)
 		//ASCII(a craft algorithm)
 
 		//BRIGHTNESS
-		recvData[0] = (readData[14]-'0');
-		recvData[0] += (readData[13]-'0')*10;
-		recvData[0] += (readData[12]-'0')*100;
+		recvData[0] = (msgColor[14]-'0');
+		recvData[0] += (msgColor[13]-'0')*10;
+		recvData[0] += (msgColor[12]-'0')*100;
 
 		//WHITE
-		recvData[1] = (readData[11]-'0');
-		recvData[1] += (readData[10]-'0')*10;
-		recvData[1] += (readData[9]-'0')*100;
+		recvData[1] = (msgColor[11]-'0');
+		recvData[1] += (msgColor[10]-'0')*10;
+		recvData[1] += (msgColor[9]-'0')*100;
 
 		//BLUE
-		recvData[2] = (readData[8]-'0');
-		recvData[2] += (readData[7]-'0')*10;
-		recvData[2] += (readData[6]-'0')*100;
+		recvData[2] = (msgColor[8]-'0');
+		recvData[2] += (msgColor[7]-'0')*10;
+		recvData[2] += (msgColor[6]-'0')*100;
 
 		//GREEN
-		recvData[3] = (readData[5]-'0');
-		recvData[3] += (readData[4]-'0')*10;
-		recvData[3] += (readData[3]-'0')*100;
+		recvData[3] = (msgColor[5]-'0');
+		recvData[3] += (msgColor[4]-'0')*10;
+		recvData[3] += (msgColor[3]-'0')*100;
 
 		//RED
-		recvData[4] = (readData[2]-'0');
-		recvData[4] += (readData[1]-'0')*10;
-		recvData[4] += (readData[0]-'0')*100;
+		recvData[4] = (msgColor[2]-'0');
+		recvData[4] += (msgColor[1]-'0')*10;
+		recvData[4] += (msgColor[0]-'0')*100;
 		/*
 		recvData[5] = (readData[2]-'0');
 		recvData[5] += (readData[1]-'0')*10;

@@ -30,6 +30,8 @@
 
 #include "uart.h"
 
+//#include "queueData.h"
+
 enum {
     UART_EVENT_RX_CHAR,
     UART_EVENT_MAX
@@ -79,6 +81,21 @@ uart0_write_char(char c)
     } else if (c == '\r') {
     } else {
         uart_tx_one_char(UART0, c);
+    }
+}
+
+void
+uart0_tx_buffer(char *string, char len){
+    while(len > 0){
+        uart0_write_char(*string++);
+        len--;
+    }
+}
+void
+uart1_tx_buffer(char *string, char len){
+    while(len > 0){
+        uart1_write_char(*string++);
+        len--;
     }
 }
 
@@ -158,7 +175,7 @@ uart_task(void *pvParameters)
         if (xQueueReceive(xQueueUart, (void *)&e, (portTickType)portMAX_DELAY)) {
             switch (e.event) {
                 case UART_EVENT_RX_CHAR:
-                    printf("%c", e.param);
+                    //printf("%c", e.param);
                     break;
 
                 default:
@@ -259,6 +276,11 @@ UART_SetFlowCtrl(UART_Port uart_no, UART_HwFlowCtrl flow_ctrl, uint8 rx_thresh)
 }
 
 void
+set_conn(noPollConn* conn)
+{
+    vg_conn = conn;
+}
+void
 UART_WaitTxFifoEmpty(UART_Port uart_no) //do not use if tx flow control enabled
 {
     while (READ_PERI_REG(UART_STATUS(uart_no)) & (UART_TXFIFO_CNT << UART_TXFIFO_CNT_S));
@@ -344,6 +366,36 @@ UART_IntrConfig(UART_Port uart_no,  UART_IntrConfTypeDef *pUARTIntrConf)
     CLEAR_PERI_REG_MASK(UART_INT_ENA(uart_no), UART_INTR_MASK);
     SET_PERI_REG_MASK(UART_INT_ENA(uart_no), pUARTIntrConf->UART_IntrEnMask);
 }
+// void setUartData(uint16 _uartData)
+// {
+//    uartData = _uartData;
+// }
+
+// uint16 getUartData()
+// {
+//   return uartData;
+// }
+
+void appen2Buffer (uint8 data)
+{
+    uart_Data.buffer = uart_Data.buffer << 8;
+    uart_Data.buffer = uart_Data.buffer | (uint16)data;
+}
+
+bool checkFlagBuffer()
+{
+    return uart_Data.flag;
+}
+
+void setFlagBuffer(bool value)
+{
+    uart_Data.flag = value;
+}
+
+uint16 getDataFromBuffer()
+{
+    return uart_Data.buffer;
+}
 
 LOCAL void
 uart0_rx_intr_handler(void *para)
@@ -364,31 +416,39 @@ uart0_rx_intr_handler(void *para)
             //printf("FRM_ERR\r\n");
             WRITE_PERI_REG(UART_INT_CLR(uart_no), UART_FRM_ERR_INT_CLR);
         } else if (UART_RXFIFO_FULL_INT_ST == (uart_intr_status & UART_RXFIFO_FULL_INT_ST)) {
-            printf("full\r\n");
+            //printf("full\r\n");
             fifo_len = (READ_PERI_REG(UART_STATUS(UART0)) >> UART_RXFIFO_CNT_S)&UART_RXFIFO_CNT;
             buf_idx = 0;
 
             while (buf_idx < fifo_len) {
-                uart_tx_one_char(UART0, READ_PERI_REG(UART_FIFO(UART0)) & 0xFF);
+                uart_tx_one_char(UART1, READ_PERI_REG(UART_FIFO(UART0)) & 0xFF);
                 buf_idx++;
             }
 
             WRITE_PERI_REG(UART_INT_CLR(UART0), UART_RXFIFO_FULL_INT_CLR);
         } else if (UART_RXFIFO_TOUT_INT_ST == (uart_intr_status & UART_RXFIFO_TOUT_INT_ST)) {
-            printf("tout\r\n");
+            //printf("tout\r\n");
             fifo_len = (READ_PERI_REG(UART_STATUS(UART0)) >> UART_RXFIFO_CNT_S)&UART_RXFIFO_CNT;
             buf_idx = 0;
 
             while (buf_idx < fifo_len) {
-                uart_tx_one_char(UART0, READ_PERI_REG(UART_FIFO(UART0)) & 0xFF);
+                uart_tx_one_char(UART1, READ_PERI_REG(UART_FIFO(UART0)) & 0xFF);
+
+                //setUartData(READ_PERI_REG(UART_FIFO(UART0)) & 0xFF);
+                //MARKY_WS_setQueueData(READ_PERI_REG(UART_FIFO(UART0)) & 0xFF);
+                //setValueData(READ_PERI_REG(UART_FIFO(UART0)) & 0xFF);
+                //uint8       macArray[6] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+                //char        macAddress[17];
+                //sprintf(macAddress, "zlextho/%02x:%02x:%02x:%02x:%02x:%02x", macArray[5], macArray[4], macArray[3], macArray[2], macArray[1], macArray[0]);
+                //MARKY_WS_Send(vg_conn, MARKY_SendT_Light_Set, 11111);
                 buf_idx++;
             }
 
             WRITE_PERI_REG(UART_INT_CLR(UART0), UART_RXFIFO_TOUT_INT_CLR);
         } else if (UART_TXFIFO_EMPTY_INT_ST == (uart_intr_status & UART_TXFIFO_EMPTY_INT_ST)) {
-            printf("empty\n\r");
+            //printf("empty\n\r");
             WRITE_PERI_REG(UART_INT_CLR(uart_no), UART_TXFIFO_EMPTY_INT_CLR);
-            CLEAR_PERI_REG_MASK(UART_INT_ENA(UART0), UART_TXFIFO_EMPTY_INT_ENA);
+            CLEAR_PERI_REG_MASK(UART_INT_ENA(UART1), UART_TXFIFO_EMPTY_INT_ENA);
         } else {
             //skip
         }
@@ -403,18 +463,28 @@ uart_init_new(void)
     UART_WaitTxFifoEmpty(UART0);
     UART_WaitTxFifoEmpty(UART1);
 
-    UART_ConfigTypeDef uart_config;
-    uart_config.baud_rate    = BIT_RATE_74880;
-    uart_config.data_bits     = UART_WordLength_8b;
-    uart_config.parity          = USART_Parity_None;
-    uart_config.stop_bits     = USART_StopBits_1;
-    uart_config.flow_ctrl      = USART_HardwareFlowControl_None;
-    uart_config.UART_RxFlowThresh = 120;
-    uart_config.UART_InverseMask = UART_None_Inverse;
-    UART_ParamConfig(UART0, &uart_config);
+    UART_ConfigTypeDef uart_config_0;
+    uart_config_0.baud_rate    = BIT_RATE_115200;
+    uart_config_0.data_bits     = UART_WordLength_8b;
+    uart_config_0.parity          = USART_Parity_None;
+    uart_config_0.stop_bits     = USART_StopBits_1;
+    uart_config_0.flow_ctrl      = USART_HardwareFlowControl_None;
+    uart_config_0.UART_RxFlowThresh = 120;
+    uart_config_0.UART_InverseMask = UART_None_Inverse;
+    UART_ParamConfig(UART0, &uart_config_0);
+
+    UART_ConfigTypeDef uart_config_1;
+    uart_config_1.baud_rate    = BIT_RATE_115200;
+    uart_config_1.data_bits     = UART_WordLength_8b;
+    uart_config_1.parity          = USART_Parity_None;
+    uart_config_1.stop_bits     = USART_StopBits_1;
+    uart_config_1.flow_ctrl      = USART_HardwareFlowControl_None;
+    uart_config_1.UART_RxFlowThresh = 120;
+    uart_config_1.UART_InverseMask = UART_None_Inverse;
+    UART_ParamConfig(UART1, &uart_config_1);
 
     UART_IntrConfTypeDef uart_intr;
-    uart_intr.UART_IntrEnMask = UART_RXFIFO_TOUT_INT_ENA | UART_FRM_ERR_INT_ENA | UART_RXFIFO_FULL_INT_ENA | UART_TXFIFO_EMPTY_INT_ENA;
+    uart_intr.UART_IntrEnMask = UART_RXFIFO_TOUT_INT_ENA | UART_FRM_ERR_INT_ENA | UART_RXFIFO_FULL_INT_ENA;
     uart_intr.UART_RX_FifoFullIntrThresh = 10;
     uart_intr.UART_RX_TimeOutIntrThresh = 2;
     uart_intr.UART_TX_FifoEmptyIntrThresh = 20;

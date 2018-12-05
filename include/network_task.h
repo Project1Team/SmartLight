@@ -40,8 +40,8 @@ typedef enum NETWORKT_STATUS
 /*
  * @brief	name and pass wifi to connect to
  */
-#define NETWORKT_SSID		"Look like a boss"	/*! name of wifi <*/
-#define NETWORKT_PASS		"motherfucker"		/*!, password of wifi */
+#define NETWORKT_SSID		"THE GREEN COFFEE"	/*! name of wifi <*/
+#define NETWORKT_PASS		"xincamon68"		/*!, password of wifi */
 #endif /* NETWORKT_Mode_Debug */
 
 /*

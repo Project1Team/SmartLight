@@ -55,7 +55,7 @@ bool NETWORK_WS_InitServer(noPollConn** listener, noPollCtx** ctx, const char* s
 
 nopoll_bool NETWORK_WS_Handler_NewConnection(noPollCtx * ctx, noPollConn * conn, noPollPtr user_data)
 {
-	printf("new client\n");
+	//printf("new client\n");
 
 	return nopoll_true;
 }
@@ -63,7 +63,7 @@ nopoll_bool NETWORK_WS_Handler_NewConnection(noPollCtx * ctx, noPollConn * conn,
 void NETWORK_WS_ListeneronMessage(noPollCtx* ctx, noPollConn* conn, noPollMsg* msg, noPollPtr user_data)
 {
 	char* receiveData;
-printf("DEALER: on Message\n");
+	printf("DEALER: on Message\n");
 
 	// print the message (for debugging purposes) and reply
 	/*
@@ -181,7 +181,7 @@ void NETWORK_TCP_InitServer(struct sockaddr_in *server, int *sock, int PORT)
 		if(*sock == -1)
 		{
 #ifdef NETWORK_TCP_Enable_Debug
-			printf("ESP8266 TCP server task > socket error\n");
+			//printf("ESP8266 TCP server task > socket error\n");
 #endif /* NETWORK_TCP_Enable_Debug */
 			vTaskDelay(100);
 		}
@@ -358,7 +358,7 @@ char* NETWORK_TCP_InitMessages_SignIn(void)
 
 	//get mac address
 	wifi_get_macaddr(STATION_IF, macArray);
-	sprintf(macAddress, "%02x:%02x:%02x:%02x:%02x:%02x", macArray[5], macArray[4], macArray[3], macArray[2], macArray[1], macArray[0]);
+	//sprintf(macAddress, "%02x:%02x:%02x:%02x:%02x:%02x", macArray[5], macArray[4], macArray[3], macArray[2], macArray[1], macArray[0]);
 
 	//pin it to message
 	for(i = 0; i < 17; i++)

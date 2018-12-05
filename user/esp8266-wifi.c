@@ -158,12 +158,12 @@ bool ICACHE_FLASH_ATTR start_wifi_station(const char * ssid, const char * pass){
     if((mode & STATION_MODE) == 0){
         mode |= STATION_MODE;
         if(!wifi_set_mode(mode)){
-            os_printf("Failed to enable Station mode!\n");
+            //os_printf("Failed to enable Station mode!\n");
             return false;
         }
     }
     if(!ssid){
-        os_printf("No SSID Given. Will connect to the station saved in flash\n");
+        //os_printf("No SSID Given. Will connect to the station saved in flash\n");
         return true;
     }
     struct station_config config;
@@ -173,14 +173,14 @@ bool ICACHE_FLASH_ATTR start_wifi_station(const char * ssid, const char * pass){
         strcpy(config.password, pass);
     }
     if(!wifi_station_set_config(&config)){
-        os_printf("Failed to set Station config!\n");
+        //os_printf("Failed to set Station config!\n");
         return false;
     }
 
     if(!wifi_station_dhcpc_status()){
-        os_printf("DHCP is not started. Starting it...\n");
+        //os_printf("DHCP is not started. Starting it...\n");
         if(!wifi_station_dhcpc_start()){
-            os_printf("DHCP start failed!\n");
+            //os_printf("DHCP start failed!\n");
             return false;
         }
     }
@@ -191,7 +191,7 @@ bool ICACHE_FLASH_ATTR stop_wifi_station(){
     WIFI_MODE mode = wifi_get_opmode();
     mode &= ~STATION_MODE;
     if(!wifi_set_mode(mode)){
-        os_printf("Failed to disable Station mode!\n");
+        //os_printf("Failed to disable Station mode!\n");
         return false;
     }
     return true;
@@ -202,19 +202,19 @@ bool ICACHE_FLASH_ATTR start_wifi_ap(const char * ssid, const char * pass){
     if((mode & STATIONAP_MODE) == 0){
         mode |= STATIONAP_MODE;
         if(!wifi_set_mode(mode)){
-            os_printf("Failed to enable AP mode!\n");
+            //os_printf("Failed to enable AP mode!\n");
             return false;
         }
     }
     if(!ssid){
-        os_printf("No SSID Given. Will start the AP saved in flash\n");
+        //os_printf("No SSID Given. Will start the AP saved in flash\n");
         return true;
     }
     struct softap_config config;
     bzero(&config, sizeof(struct softap_config));
-    sprintf(config.ssid, ssid);
+    //sprintf(config.ssid, ssid);
     if(pass){
-        sprintf(config.password, pass);
+        //sprintf(config.password, pass);
     }
     return wifi_softap_set_config(&config);
 }
@@ -230,7 +230,7 @@ bool start_wifi_ap_station(const char* st_ssid, const char* st_pass, const char*
         mode |= STATIONAP_MODE;
         if(!wifi_set_mode(mode))
         {
-            os_printf("Failed to enable Station mode!\n");
+            //os_printf("Failed to enable Station mode!\n");
             return false;
         }
     }
@@ -245,7 +245,7 @@ bool start_wifi_ap_station(const char* st_ssid, const char* st_pass, const char*
 			strcpy(st_config.password, st_pass);
 		if(!wifi_station_set_config(&st_config))
 		{
-			os_printf("Failed to set Station config!\n");
+			//os_printf("Failed to set Station config!\n");
 			return false;
 		}
     }
@@ -255,7 +255,7 @@ bool start_wifi_ap_station(const char* st_ssid, const char* st_pass, const char*
 		os_printf("DHCP is not started. Starting it...\n");
 		if(!wifi_station_dhcpc_start())
 		{
-			os_printf("DHCP start failed!\n");
+			//os_printf("DHCP start failed!\n");
 			return false;
 		}
 	}
@@ -264,11 +264,11 @@ bool start_wifi_ap_station(const char* st_ssid, const char* st_pass, const char*
     //access point
     struct softap_config ap_config;
     bzero(&ap_config, sizeof(struct softap_config));
-    sprintf(ap_config.ssid, ap_ssid);
+    //sprintf(ap_config.ssid, ap_ssid);
     ap_config.ssid_len = strlen(ap_ssid);
     if(ap_pass)
     {
-        sprintf(ap_config.password, ap_pass);
+        //sprintf(ap_config.password, ap_pass);
     }
     ap_config.max_connection = 1;
     ap_config.authmode = AUTH_WPA_WPA2_PSK;
@@ -282,7 +282,7 @@ bool stop_wifi_ap_station(void)
     mode &= ~STATIONAP_MODE;
     if(!wifi_set_mode(mode))
     {
-        os_printf("Failed to disable STATION/AP mode!\n");
+        //os_printf("Failed to disable STATION/AP mode!\n");
         return false;
     }
 
@@ -294,7 +294,7 @@ bool ICACHE_FLASH_ATTR stop_wifi_ap(){
     WIFI_MODE mode = wifi_get_opmode();
     mode &= ~SOFTAP_MODE;
     if(!wifi_set_mode(mode)){
-        os_printf("Failed to disable AP mode!\n");
+        //os_printf("Failed to disable AP mode!\n");
         return false;
     }
     return true;

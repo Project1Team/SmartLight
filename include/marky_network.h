@@ -18,8 +18,8 @@
 /*
  * @brief	server information
  */
-#define MARKY_SERVER_Ip			"192.168.137.251"			//Local IP of wifi
-#define MARKY_SERVER_Port		"8887"						//Local port
+#define MARKY_SERVER_Ip			"172.16.3.195"			//Local IP of wifi
+#define MARKY_SERVER_Port		"8888"						//Local port
 #define MARKY_SERVER_SubUrl		"/ws"					//ws enpoint
 
 
@@ -51,6 +51,7 @@ typedef enum MARKY_SENDTYPE
 
 //-----------------------------------------------------------------------
 
+static uint8 queueData = 0x00;
 /*
  * @brief	get mac address of chip and implement to  messages login to server
  * @return	login message
@@ -99,5 +100,10 @@ bool MARKY_WS_Recv(noPollConn* conn, uint8_t* recvData);
  * @return	true if succeed
  */
 bool MARKY_WS_CheckWSMailBox(noPollConn* conn);
+
+void MARKY_WS_sendData(noPollConn* conn, uint8 data);
+
+void MARKY_WS_setQueueData(uint8 data);
+
 
 #endif /* INCLUDE_MARKY_NETWORK_H_ */

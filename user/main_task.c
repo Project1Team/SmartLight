@@ -25,14 +25,13 @@ void Main_Task(void *pArg)
 	Task_Mailbox mailbox;
 
 	//init light task
-	Light_Init(&mailbox);
+	//Light_Init(&mailbox);
 
 	//init network task
 	MARKYT_Init(&mailbox);
 
 	while(1)
 	{
-
 		vTaskDelay(100);
 	}
 }

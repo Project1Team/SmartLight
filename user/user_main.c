@@ -7,7 +7,6 @@
 #include "../include/main_task.h"
 #include "uart.h"
 
-
 /******************************************************************************
  * FunctionName : user_rf_cal_sector_set
  * Description  : SDK just reversed 4 sectors, used for rf init data and paramters.
@@ -61,10 +60,10 @@ uint32 user_rf_cal_sector_set(void)
 void user_init(void)
 {
 	wifi_station_set_auto_connect (false);
-
-	UART_SetBaudrate(UART0,115200);
-
-    printf("SDK version:%s\n", system_get_sdk_version());
+    uart_init_new();
+	//UART_SetBaudrate(UART1,115200);
+    
+    //printf("SDK version:%s\n", system_get_sdk_version());
 
     Main_Task_Init(NULL);
 }

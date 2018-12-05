@@ -29,6 +29,11 @@
 extern "C" {
 #endif
 
+#include "marky_network_task.h"
+#include "mailbox.h"
+#include "marky_network.h"
+#include "network_task.h"
+
 #define ETS_UART_INTR_ENABLE()  _xt_isr_unmask(1 << ETS_UART_INUM)
 #define ETS_UART_INTR_DISABLE() _xt_isr_mask(1 << ETS_UART_INUM)
 #define UART_INTR_MASK          0x1ff
@@ -114,6 +119,30 @@ typedef struct {
     uint8  UART_RX_FifoFullIntrThresh;
 } UART_IntrConfTypeDef;
 
+static noPollConn* vg_conn = NULL;
+
+typedef struct{
+  bool flag;
+  uint16 buffer;
+} UART_DataSendServer;
+
+static UART_DataSendServer uart_Data = {false, 0x0000};
+
+void appen2Buffer (uint8 data);
+
+bool checkFlagBuffer();
+
+void setFlagBuffer(bool value);
+
+uint16 getDataFromBuffer();
+
+// static uint16 uartData = 0x0000;
+
+// void setUartData(uint16 _uartData);
+
+// uint16 getUartData();
+
+void set_conn(noPollConn* conn);
 //=======================================
 
 /** \defgroup Driver_APIs Driver APIs
@@ -234,7 +263,7 @@ void UART_SetStopBits(UART_Port uart_no, UART_StopBits bit_num);
   * 
   * @param   UART_Port uart_no : UART0 or UART1
   * @param   UART_ParityMode Parity_mode : the enum of uart parity configuration
-  *  
+  *  void uart0_tx_buffer(char *string, char len)
   * @return  null
   */
 void UART_SetParity(UART_Port uart_no, UART_ParityMode Parity_mode) ;
@@ -286,6 +315,8 @@ void uart_init_new(void);
 /**
   * @}
   */
+void uart0_tx_buffer(char *string, char len);
+void uart1_tx_buffer(char *string, char len);
 
 #ifdef __cplusplus
 }

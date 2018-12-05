@@ -94,6 +94,13 @@ bool MARKY_WS_LogintoServer(noPollConn** conn)
 	return true;
 }
 
+void MARKY_WS_sendData(noPollConn* conn, uint8 data)
+{
+	char		dataArray[17];
+	sprintf(dataArray, "data/%02x", data);
+	nopoll_conn_send_text (conn, dataArray ,strlen(dataArray));
+}
+
 void MARKY_WS_Close(noPollConn** conn)
 {
 	noPollCtx*  ctx;

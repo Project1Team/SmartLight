@@ -10,6 +10,7 @@
 #include "mailbox.h"
 #include "marky_network.h"
 #include "network_task.h"
+#include "uart.h"
 
 xTaskHandle MARKYT_Init(void *pArg)
 {
@@ -56,13 +57,17 @@ void MARKYT_Task(void *pArg)
 		case MARKYT_OP_ConnectToServer:
 			//connect to server
 			if(MARKY_WS_LogintoServer(&conn) == true)
+			{
+				//set_conn(conn);
 				mode = MARKYT_OP_TalkToServer;
+			}
 
 			//check if wifi is ok
 			if( !(*networkStatus & NETWORKT_ST_Wifi_Connection) )
 			{
 				//close connection
 				MARKY_WS_Close(&conn);
+				//set_conn(conn);
 				mode = MARKYT_OP_Startup;
 			}
 
@@ -76,6 +81,11 @@ void MARKYT_Task(void *pArg)
 				//mailbox->deedee = recvData;
 			//}
 //			printf("MARKYT: %d\n", system_get_free_heap_size());
+			// if(getUartData() != 0x00)
+			// {
+			// 	MARKY_WS_sendData(conn, getUartData());
+			// 	setUartData(0x00);
+			// }
 
 			MARKY_WS_Recv(conn, mailbox->light);
 
@@ -84,6 +94,7 @@ void MARKYT_Task(void *pArg)
 			{
 				//close connection
 				MARKY_WS_Close(&conn);
+				//set_conn(conn);
 				mode = MARKYT_OP_Startup;
 			}
 
@@ -92,6 +103,7 @@ void MARKYT_Task(void *pArg)
 			{
 				//close connection
 				MARKY_WS_Close(&conn);
+				//set_conn(conn);
 				mode = MARKYT_OP_Startup;
 			}
 

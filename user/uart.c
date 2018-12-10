@@ -276,11 +276,6 @@ UART_SetFlowCtrl(UART_Port uart_no, UART_HwFlowCtrl flow_ctrl, uint8 rx_thresh)
 }
 
 void
-set_conn(noPollConn* conn)
-{
-    vg_conn = conn;
-}
-void
 UART_WaitTxFifoEmpty(UART_Port uart_no) //do not use if tx flow control enabled
 {
     while (READ_PERI_REG(UART_STATUS(uart_no)) & (UART_TXFIFO_CNT << UART_TXFIFO_CNT_S));
@@ -376,25 +371,24 @@ UART_IntrConfig(UART_Port uart_no,  UART_IntrConfTypeDef *pUARTIntrConf)
 //   return uartData;
 // }
 
-void appen2Buffer (uint8 data)
+void setDataItem(uint8 value, int index)
 {
-    uart_Data.buffer = uart_Data.buffer << 8;
-    uart_Data.buffer = uart_Data.buffer | (uint16)data;
+    DataSend[index] = value;
 }
 
-bool checkFlagBuffer()
+uint8 getDataItem(int index)
 {
-    return uart_Data.flag;
+    return DataSend[index];
 }
 
-void setFlagBuffer(bool value)
+void setFlagSend(bool value)
 {
-    uart_Data.flag = value;
+    flag_send = value;
 }
 
-uint16 getDataFromBuffer()
+uint8 checkFlagSend()
 {
-    return uart_Data.buffer;
+    return flag_send;
 }
 
 LOCAL void
@@ -407,7 +401,9 @@ uart0_rx_intr_handler(void *para)
     uint8 uart_no = UART0;//UartDev.buff_uart_no;
     uint8 fifo_len = 0;
     uint8 buf_idx = 0;
+    uint8 value = 0x00;
     uint8 fifo_tmp[128] = {0};
+    int count = 0;
 
     uint32 uart_intr_status = READ_PERI_REG(UART_INT_ST(uart_no)) ;
 
@@ -432,15 +428,50 @@ uart0_rx_intr_handler(void *para)
             buf_idx = 0;
 
             while (buf_idx < fifo_len) {
-                uart_tx_one_char(UART1, READ_PERI_REG(UART_FIFO(UART0)) & 0xFF);
+
+                value = (READ_PERI_REG(UART_FIFO(UART0)) & 0xFF);
+
+                if(count > 0)
+                {
+                    setDataItem(value, count - 1);
+                    count ++;
+                }
+                
+                if(count == 3)
+                {
+                    setFlagSend(true);
+                    count = 0;
+                }
+
+                if((value == 0xFE) && (checkFlagSend() == false))
+                {
+                    count ++;
+                }
+
+                // if(count == 2)
+                // {
+                //     setFlagBuffer(true);
+                //     count = 0;
+                //     setReady(false);
+                // }
+
+                // if(checkReady2Receive() == true)
+                // {
+                //     count ++;
+                //     appen2Buffer(value);
+                // }
+
+                // if((value == 0xFF) && (checkFlagBuffer() == false))
+                // {
+                //     setReady(true);
+                // }
+
+                //if(value == )
+                //uart_tx_one_char(UART1, READ_PERI_REG(UART_FIFO(UART0)) & 0xFF);
 
                 //setUartData(READ_PERI_REG(UART_FIFO(UART0)) & 0xFF);
                 //MARKY_WS_setQueueData(READ_PERI_REG(UART_FIFO(UART0)) & 0xFF);
                 //setValueData(READ_PERI_REG(UART_FIFO(UART0)) & 0xFF);
-                //uint8       macArray[6] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-                //char        macAddress[17];
-                //sprintf(macAddress, "zlextho/%02x:%02x:%02x:%02x:%02x:%02x", macArray[5], macArray[4], macArray[3], macArray[2], macArray[1], macArray[0]);
-                //MARKY_WS_Send(vg_conn, MARKY_SendT_Light_Set, 11111);
                 buf_idx++;
             }
 

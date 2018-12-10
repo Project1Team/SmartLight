@@ -119,23 +119,19 @@ typedef struct {
     uint8  UART_RX_FifoFullIntrThresh;
 } UART_IntrConfTypeDef;
 
-static noPollConn* vg_conn = NULL;
+static uint8 DataSend[2] = {0x00, 0x00};
 
-typedef struct{
-  bool flag;
-  uint16 buffer;
-} UART_DataSendServer;
+void setDataItem(uint8 value, int index);
 
-static UART_DataSendServer uart_Data = {false, 0x0000};
+uint8 getDataItem(int index);
 
-void appen2Buffer (uint8 data);
+static bool flag_send = false;
 
-bool checkFlagBuffer();
+void setFlagSend(bool value);
 
-void setFlagBuffer(bool value);
+uint8 checkFlagSend();
 
-uint16 getDataFromBuffer();
-
+static uint8 DataReceived[2] = {0x00, 0x00};
 // static uint16 uartData = 0x0000;
 
 // void setUartData(uint16 _uartData);

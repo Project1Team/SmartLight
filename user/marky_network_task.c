@@ -40,6 +40,13 @@ void MARKYT_Task(void *pArg)
 	//init network operation
 	NETWORKT_Init(NULL);
 
+	uint8_t dataReceived[2] = {0,0};
+
+	uint8 byte_start = 0xFE;
+	uint8 item1_data_received = 0x00;
+	uint8 item2_data_received = 0x00;
+	uint8 data_send2nRF[3] = {0x00, 0x00, 0x00};
+
 	while(1)
 	{
 		switch(mode)
@@ -81,13 +88,70 @@ void MARKYT_Task(void *pArg)
 				//mailbox->deedee = recvData;
 			//}
 //			printf("MARKYT: %d\n", system_get_free_heap_size());
-			// if(getUartData() != 0x00)
+
+			// if(checkFlagBuffer() == true)
 			// {
-			// 	MARKY_WS_sendData(conn, getUartData());
-			// 	setUartData(0x00);
+			// 	MARKY_WS_sendData(conn, getDataFromBuffer());
+			// 	setFlagBuffer(false);
 			// }
 
-			MARKY_WS_Recv(conn, mailbox->light);
+			if(checkFlagSend() == true)
+			{
+				MARKY_WS_send2Byte(conn, getDataItem(1), getDataItem(0));
+				setFlagSend(false);
+			}
+
+			if(MARKY_WS_RecvData(conn, dataReceived))
+			{
+				// set status
+				if(dataReceived[2] == 0)
+				{
+					item2_data_received = item2_data_received | 0x10;
+				}
+				else if(dataReceived[2] == 1)
+				{
+					item2_data_received = item2_data_received & 0x01;
+				}
+
+				// set number switch of switch board
+				if(dataReceived[1] == 1)
+				{
+					item2_data_received = item2_data_received & 0x10;
+					item2_data_received = item2_data_received | 0x01;
+				}
+				else if(dataReceived[1] == 2)
+				{
+					item2_data_received = item2_data_received & 0x10;
+					item2_data_received = item2_data_received | 0x02;
+				}
+				else if(dataReceived[1] == 3)
+				{
+					item2_data_received = item2_data_received & 0x10;
+					item2_data_received = item2_data_received | 0x03;
+				}
+				else if(dataReceived[1] == 4)
+				{
+					item2_data_received = item2_data_received & 0x10;
+					item2_data_received = item2_data_received | 0x04;
+				}
+				// set number switch board
+				if(dataReceived[0] == 0)
+				{
+					item1_data_received = 0x03;	
+				}
+				else if(dataReceived[0] == 1)
+				{
+					item1_data_received = 0x13;
+				}
+				else
+				{
+					// to append new switch board if any
+				}
+				data_send2nRF[0] = byte_start;
+				data_send2nRF[1] = item1_data_received;
+				data_send2nRF[2] = item2_data_received;
+				uart1_tx_buffer(data_send2nRF, 3);
+			}
 
 			//check connection
 			if (! nopoll_conn_is_ready(conn))

@@ -18,7 +18,7 @@
 /*
  * @brief	server information
  */
-#define MARKY_SERVER_Ip			"172.16.3.195"			//Local IP of wifi
+#define MARKY_SERVER_Ip			"192.168.137.31"			//Local IP of wifi
 #define MARKY_SERVER_Port		"8888"						//Local port
 #define MARKY_SERVER_SubUrl		"/ws"					//ws enpoint
 
@@ -99,11 +99,14 @@ bool MARKY_WS_Recv(noPollConn* conn, uint8_t* recvData);
  * @param	conn:	connection handler
  * @return	true if succeed
  */
+
+bool MARKY_WS_RecvData(noPollConn* conn, uint8_t* recvData);
+
 bool MARKY_WS_CheckWSMailBox(noPollConn* conn);
 
-void MARKY_WS_sendData(noPollConn* conn, uint8 data);
+void MARKY_WS_sendData(noPollConn* conn, uint16 data);
 
-void MARKY_WS_setQueueData(uint8 data);
+void MARKY_WS_send2Byte(noPollConn* conn, uint8 data1, uint8 data2);
 
 
 #endif /* INCLUDE_MARKY_NETWORK_H_ */

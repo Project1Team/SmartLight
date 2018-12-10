@@ -94,10 +94,22 @@ bool MARKY_WS_LogintoServer(noPollConn** conn)
 	return true;
 }
 
-void MARKY_WS_sendData(noPollConn* conn, uint8 data)
+void MARKY_WS_sendData(noPollConn* conn, uint16 data)
 {
 	char		dataArray[17];
-	sprintf(dataArray, "data/%02x", data);
+	uint8 data1 = 0x00;
+	uint8 data2 = 0x00;
+
+	data1 = (uint8)(data & 0x00FF);
+	data2 = (uint8)((data >> 8) & 0x00FF);
+	sprintf(dataArray, "data/%02x:%02x", data1, data2);
+	nopoll_conn_send_text (conn, dataArray ,strlen(dataArray));
+}
+
+void MARKY_WS_send2Byte(noPollConn* conn, uint8 data1, uint8 data2)
+{
+	char		dataArray[17];
+	sprintf(dataArray, "data/%02x:%02x", data1, data2);
 	nopoll_conn_send_text (conn, dataArray ,strlen(dataArray));
 }
 
@@ -251,6 +263,38 @@ bool MARKY_WS_Recv(noPollConn* conn, uint8_t* recvData)
 	return false;
 }
 
+bool MARKY_WS_RecvData(noPollConn* conn, uint8_t* recvData)
+{
+	noPollMsg* msg;
+	char* readData = NULL;
+	char* change_status = "switch/";
+	if ( !nopoll_conn_is_ready (conn) )
+		return false;
+
+	if( MARKY_WS_CheckWSMailBox(conn) )
+	{
+		msg = nopoll_conn_get_msg(conn);
+		if(msg == NULL)
+			return false;
+
+		readData = (char*)nopoll_msg_get_payload(msg);
+		int i = 0;
+		for (i = 0; i < 7; i++)
+		{
+			if(readData[i] != change_status[i])
+				return false;
+		}
+		recvData[0] = (readData[7] - '0');
+		recvData[1] = (readData[8] - '0');
+		recvData[2] = (readData[9] - '0');
+
+		free(readData);
+
+		return true;
+	}
+
+	return false;
+}
 bool MARKY_WS_CheckWSMailBox(noPollConn* conn)
 {
     struct timeval tv;

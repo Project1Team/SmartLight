@@ -109,7 +109,38 @@ void MARKY_WS_sendData(noPollConn* conn, uint16 data)
 void MARKY_WS_send2Byte(noPollConn* conn, uint8 data1, uint8 data2)
 {
 	char		dataArray[17];
-	sprintf(dataArray, "data/%02x:%02x", data1, data2);
+	int 		number_hundred = 0;
+	int 		number_ten = 0;
+	int 		number_unit = 0;
+	uint8_t 	temperature = 0;
+	if(data1 == 0x54)
+	{
+		temperature = data2;
+		number_hundred = temperature / 100;
+		number_ten = (temperature % 100) / 10;
+		number_unit = (temperature % 100) % 10;
+		if(number_hundred != 0)
+			sprintf(dataArray, "temperature/%d%d%d", number_hundred, number_ten, number_unit);
+		else if(number_ten != 0)
+			sprintf(dataArray, "temperature/%d%d", number_ten, number_unit);
+		else
+			sprintf(dataArray, "temperature/%d", number_unit);
+	}
+	else if(data1 == 0x47)
+	{
+		if(data2 == 0x01)
+			sprintf(dataArray, "gas/sos");
+		else
+			sprintf(dataArray, "gas/safe");
+	}
+	else if(data1 == 0x46)
+	{
+		if(data2 == 0x01)
+			sprintf(dataArray, "fire/sos");
+		else
+			sprintf(dataArray, "fire/safe");
+	}
+	
 	nopoll_conn_send_text (conn, dataArray ,strlen(dataArray));
 }
 

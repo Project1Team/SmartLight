@@ -129,18 +129,19 @@ void MARKY_WS_send2Byte(noPollConn* conn, uint8 data1, uint8 data2)
 	else if(data1 == 0x47)
 	{
 		if(data2 == 0x01)
-			sprintf(dataArray, "gas/sos");
+			sprintf(dataArray, "gas/GAS DETECTED");
 		else
-			sprintf(dataArray, "gas/safe");
+			sprintf(dataArray, "gas/SAFE");
 	}
 	else if(data1 == 0x46)
 	{
 		if(data2 == 0x01)
-			sprintf(dataArray, "fire/sos");
+			sprintf(dataArray, "fire/FIRE DETECTED");
 		else
-			sprintf(dataArray, "fire/safe");
+			sprintf(dataArray, "fire/SAFE");
 	}
-	
+	else
+		return;
 	nopoll_conn_send_text (conn, dataArray ,strlen(dataArray));
 }
 

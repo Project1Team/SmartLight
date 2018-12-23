@@ -18,8 +18,8 @@
 /*
  * @brief	server information
  */
-#define MARKY_SERVER_Ip			"192.168.137.31"			//Local IP of wifi
-#define MARKY_SERVER_Port		"8888"						//Local port
+#define MARKY_SERVER_Ip			"ubuntu.localhost.run"			//Local IP of wifi
+#define MARKY_SERVER_Port		"80"						//Local port
 #define MARKY_SERVER_SubUrl		"/ws"					//ws enpoint
 
 

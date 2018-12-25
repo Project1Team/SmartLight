@@ -298,8 +298,12 @@ bool MARKY_WS_Recv(noPollConn* conn, uint8_t* recvData)
 bool MARKY_WS_RecvData(noPollConn* conn, uint8_t* recvData)
 {
 	noPollMsg* msg;
+	bool isSwitch = true;
+	bool isFire = true;
+	bool isGas = true;
 	char* readData = NULL;
 	char* change_status = "switch/";
+	char* reset_fire = "resetFire";
 	if ( !nopoll_conn_is_ready (conn) )
 		return false;
 
@@ -314,17 +318,36 @@ bool MARKY_WS_RecvData(noPollConn* conn, uint8_t* recvData)
 		for (i = 0; i < 7; i++)
 		{
 			if(readData[i] != change_status[i])
-				return false;
+			{
+				isSwitch = false;
+				break;
+			}
 		}
-		recvData[0] = (readData[7] - '0');
-		recvData[1] = (readData[8] - '0');
-		recvData[2] = (readData[9] - '0');
-
-		free(readData);
-
-		return true;
+		if(isSwitch == true)
+		{
+			recvData[0] = (readData[7] - '0');
+			recvData[1] = (readData[8] - '0');
+			recvData[2] = (readData[9] - '0');
+			free(readData);
+			return true;
+		}
+		for(i = 0; i < 9; i++)
+		{
+			if(readData[i] != reset_fire[i])
+			{
+				isFire = false;
+				break;
+			}
+		}
+		if(isFire == true)
+		{
+			recvData[0] = ('f' - '0');
+			recvData[1] = ('i' - '0');
+			recvData[2] = ('r' - '0');
+			free(readData);
+			return true;
+		}
 	}
-
 	return false;
 }
 bool MARKY_WS_CheckWSMailBox(noPollConn* conn)

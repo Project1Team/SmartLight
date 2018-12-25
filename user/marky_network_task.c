@@ -143,9 +143,11 @@ void MARKYT_Task(void *pArg)
 				{
 					item1_data_received = 0x13;
 				}
-				else
+				else if(dataReceived[0] == ('f' - '0'))
 				{
-					// to append new switch board if any
+					item1_data_received = 0x46;
+					item2_data_received = 0x00;
+
 				}
 				data_send2nRF[0] = byte_start;
 				data_send2nRF[1] = item1_data_received;

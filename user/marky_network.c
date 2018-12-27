@@ -304,6 +304,7 @@ bool MARKY_WS_RecvData(noPollConn* conn, uint8_t* recvData)
 	char* readData = NULL;
 	char* change_status = "switch/";
 	char* reset_fire = "resetFire";
+	char* reset_gas = "resetGas";
 	if ( !nopoll_conn_is_ready (conn) )
 		return false;
 
@@ -344,6 +345,22 @@ bool MARKY_WS_RecvData(noPollConn* conn, uint8_t* recvData)
 			recvData[0] = ('f' - '0');
 			recvData[1] = ('i' - '0');
 			recvData[2] = ('r' - '0');
+			free(readData);
+			return true;
+		}
+		for(i = 0; i < 8; i++)
+		{
+			if(readData[i] != reset_gas[i])
+			{
+				isGas = false;
+				break;
+			}
+		}
+		if(isGas == true)
+		{
+			recvData[0] = ('g' - '0');
+			recvData[1] = ('a' - '0');
+			recvData[2] = ('s' - '0');
 			free(readData);
 			return true;
 		}

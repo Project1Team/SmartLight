@@ -149,6 +149,12 @@ void MARKYT_Task(void *pArg)
 					item2_data_received = 0x00;
 
 				}
+				else if(dataReceived[0] == 'g' - '0')
+				{
+					item1_data_received = 0x47;
+					item2_data_received = 0x00;
+				}
+				
 				data_send2nRF[0] = byte_start;
 				data_send2nRF[1] = item1_data_received;
 				data_send2nRF[2] = item2_data_received;
